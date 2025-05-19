@@ -62,7 +62,58 @@ export const register = async (req,res)=>{
 
 }
 
-export const login = async (req,res)=>{}
+export const login = async (req,res)=>{
+
+    const {email,password} = req.body;
+
+    try {
+        const user = await db.user.findUnique({
+            where:{email}
+        })
+
+        if(!user){
+            return res.status(401).json({
+                error:"User not found!"
+            })
+        }
+
+        const isMatched = await bcrypt.compare(password,user.password);
+
+        if(!isMatched){
+            return res.status(401).json({
+               error:"invalid credentials" 
+            })
+        }
+
+        const token = jwt.sign({id:user.id},process.env.JWT_SECRET,{
+           expiresIn:"7d" 
+        })
+
+        res.cookie("jwt",token,{
+            httpOnly:true,
+            sameSite:"strict",
+            secure:process.env.NODE_ENV!=='development',
+            maxAge:1000*60*60*24*7
+        }) 
+
+        res.status(201).json({
+            message:"user logged in successfully",
+            user:{
+                id:user.id,
+                name:user.name,
+                email:user.email,
+                role:user.role, 
+                image:user.image
+            }
+        })
+
+    } catch (error) {
+        console.error("error logging in user",error);
+        res.status(500).json({
+            error:"error logging in user"
+        })
+    }
+}
 
 export const logout = async (req,res)=>{}
 
