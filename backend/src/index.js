@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv"
 import authRoutes from "./routes/auth.routes.js";
-import cookieParser from "cookie-parser";
+import cookieParser from 'cookie-parser';
 
 
  
@@ -13,6 +13,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get('/',(req,res)=>{ 
+    console.log(req.cookies);        // Access all cookies
     res.send("hello guys welcome to leetzone");
 });
 
